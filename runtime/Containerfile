@@ -1,0 +1,29 @@
+FROM quay.io/almalinuxorg/almalinux:10
+
+ARG PROTON_VER=GE-Proton11-11
+ARG PROTON_SHA512=45721a7b625b2404d8896bb5e2a8b87fc9623a394873a6dd6b900c839681d5c01ec694ca00d003fc9c733c5f6c5648af8171985656f9fa47e20999fbebdbe235
+ARG UMU_VER=1.4.4
+ARG UMU_SHA256=eb590691841f7fad3fc3ad8fd5db4ccb87849fe7948e62b28ece7a4ee48cc851
+
+RUN dnf -y install python3 curl tar gzip xorg-x11-server-Xvfb mesa-vulkan-drivers vulkan-loader \
+      libX11 freetype fontconfig nmap-ncat procps-ng && dnf clean all
+
+# Pinned Proton and umu, each checked against a published hash. A mismatch fails the build.
+RUN mkdir -p /opt/proton /opt/umu \
+ && curl -fsSL -o /tmp/p.tgz https://github.com/GloriousEggroll/proton-ge-custom/releases/download/${PROTON_VER}/${PROTON_VER}-x86_64.tar.gz \
+ && echo "${PROTON_SHA512}  /tmp/p.tgz" | sha512sum -c - \
+ && tar -xzf /tmp/p.tgz -C /opt/proton --strip-components=1 && rm /tmp/p.tgz \
+ && curl -fsSL -o /tmp/u.tar https://github.com/Open-Wine-Components/umu-launcher/releases/download/${UMU_VER}/umu-launcher-${UMU_VER}-zipapp.tar \
+ && echo "${UMU_SHA256}  /tmp/u.tar" | sha256sum -c - \
+ && tar -xf /tmp/u.tar -C /opt/umu --strip-components=1 && rm /tmp/u.tar
+
+RUN useradd -m -u 1000 svc && mkdir -p /data /opt/app && chown svc /data
+COPY entrypoint.sh healthcheck.sh /usr/local/bin/
+RUN chmod 0555 /usr/local/bin/entrypoint.sh /usr/local/bin/healthcheck.sh
+
+USER svc
+ENV PROTONPATH=/opt/proton GAMEID=0 WINEPREFIX=/data/prefix HOME=/data \
+    APP_EXE=/opt/app/uro.exe FDB_PORT=4500 BAO_PORT=8200
+STOPSIGNAL SIGTERM
+HEALTHCHECK --interval=15s --timeout=5s --start-period=120s --retries=3 CMD ["/usr/local/bin/healthcheck.sh"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
