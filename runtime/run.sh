@@ -2,7 +2,7 @@
 # Hardened run: read-only root, no capabilities, bounded memory/pids/logs, restarts on a failed health check.
 set -eu
 APP_DIR="${APP_DIR:?set APP_DIR to the folder holding the Burrito .exe}"
-DATA_DIR="${DATA_DIR:?set DATA_DIR to a persistent folder for FDB, Bao and the Wine prefix}"
+DATA_DIR="${DATA_DIR:?set DATA_DIR to a persistent folder for FDB, the secrets server and the Wine prefix}"
 podman rm -f fabric >/dev/null 2>&1 || true
 exec podman run -d --name fabric \
   --init --read-only --read-only-tmpfs=false \

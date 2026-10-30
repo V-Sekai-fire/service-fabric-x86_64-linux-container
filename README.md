@@ -1,4 +1,4 @@
-Hardened container that runs a Windows Elixir Burrito under Proton, with the BEAM supervising fdbserver.exe and bao.exe.
+Hardened container that runs a Windows Elixir Burrito under Proton, with the BEAM supervising the FDB and secrets servers.
 
     pixi run build     # builds the image (pinned Proton and umu, hash-checked)
     APP_DIR=/path/to/burrito DATA_DIR=/path/to/data pixi run run
