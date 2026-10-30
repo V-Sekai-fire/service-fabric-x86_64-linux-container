@@ -3,7 +3,7 @@ name = "bao"
 channels = ["conda-forge"]
 platforms = ["linux-64", "win-64"]
 
-# Every task shells out to podman, which the host provides (the Bolt, or WSL2 here).
+# Every task shells out to podman, which the host provides (the host machine).
 [tasks]
 build  = "podman build -t localhost/bao-runtime:dev -f runtime/Containerfile runtime"
 run    = { cmd = "sh runtime/run.sh", depends-on = ["build"] }
