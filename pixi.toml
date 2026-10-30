@@ -1,13 +1,13 @@
 [workspace]
-name = "bao-bolt"
+name = "bao"
 channels = ["conda-forge"]
 platforms = ["linux-64", "win-64"]
 
 # Every task shells out to podman, which the host provides (the Bolt, or WSL2 here).
 [tasks]
-build  = "podman build -t localhost/bao-bolt-runtime:dev -f runtime/Containerfile runtime"
+build  = "podman build -t localhost/bao-runtime:dev -f runtime/Containerfile runtime"
 run    = { cmd = "sh runtime/run.sh", depends-on = ["build"] }
-stop   = "podman stop -t 60 bao-bolt"
-health = "podman healthcheck run bao-bolt && echo healthy"
-logs   = "podman logs --tail 200 bao-bolt"
+stop   = "podman stop -t 60 bao"
+health = "podman healthcheck run bao && echo healthy"
+logs   = "podman logs --tail 200 bao"
 check  = "sh runtime/selftest.sh"
